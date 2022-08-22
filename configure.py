@@ -343,7 +343,7 @@ else:
               '-fno-rtti',
               '-fno-exceptions',
               '-std=c++11',
-              '-fvisibility=hidden', 
+              '-fvisibility=hidden', '-D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE_EXTENDED=1 -D_UNIX03_THREADS',
               '-DNINJA_PYTHON="%s"' % options.with_python]
     if options.debug:
         cflags += ['-D_GLIBCXX_DEBUG', '-D_GLIBCXX_DEBUG_PEDANTIC']
