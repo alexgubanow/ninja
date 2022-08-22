@@ -720,7 +720,11 @@ int GetProcessorCount() {
   }
 #endif
   if (cgroupCount >= 0 && schedCount >= 0) return std::min(cgroupCount, schedCount);
+#if !__MVS__
   if (cgroupCount < 0 && schedCount < 0) return sysconf(_SC_NPROCESSORS_ONLN);
+#else
+  if (cgroupCount < 0 && schedCount < 0) return 4;
+#endif
   return std::max(cgroupCount, schedCount);
 #endif
 }
