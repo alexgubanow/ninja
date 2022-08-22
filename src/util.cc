@@ -799,6 +799,10 @@ double GetLoadAverage() {
 double GetLoadAverage() {
   return -0.0f;
 }
+#elif defined(__MVS__)
+double GetLoadAverage() {
+  return -0.0f;
+}
 #elif defined(_AIX)
 double GetLoadAverage() {
   perfstat_cpu_total_t cpu_stats;
