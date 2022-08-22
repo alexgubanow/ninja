@@ -774,22 +774,23 @@ int NinjaMain::ToolInputs(const Options* options, int argc, char* argv[]) {
   int opt;
   const option kLongOptions[] = { { "help", no_argument, NULL, 'h' },
                                   { NULL, 0, NULL, 0 } };
-  while ((opt = getopt_long(argc, argv, "h", kLongOptions, NULL)) != -1) {
-    switch (opt) {
-    case 'h':
-    default:
-      // clang-format off
-      printf(
-"Usage '-t inputs [options] [targets]\n"
-"\n"
-"List all inputs used for a set of targets. Note that this includes\n"
-"explicit, implicit and order-only inputs, but not validation ones.\n\n"
-"Options:\n"
-"  -h, --help   Print this message.\n");
-      // clang-format on
-      return 1;
-    }
-  }
+//   while ((opt = getopt_long(argc, argv, "h", kLongOptions, NULL)) != -1) {
+//     switch (opt) {
+//     case 'h':
+//     default:
+//       // clang-format off
+//       printf(
+// "Usage '-t inputs [options] [targets]\n"
+// "\n"
+// "List all inputs used for a set of targets. Note that this includes\n"
+// "explicit, implicit and order-only inputs, but not validation ones.\n\n"
+// "Options:\n"
+// "  -h, --help   Print this message.\n");
+//       // clang-format on
+//       return 1;
+//     }
+//   }
+printf("not supported\n");
   argv += optind;
   argc -= optind;
 
