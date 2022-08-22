@@ -28,6 +28,9 @@
 #elif defined(_AIX)
 #include "getopt.h"
 #include <unistd.h>
+#elif defined(__MVS__)
+#define _XOPEN_SOURCE 600
+#include <unistd.h>
 #else
 #include <getopt.h>
 #include <unistd.h>
