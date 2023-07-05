@@ -4,8 +4,9 @@ include(CheckSymbolExists)
 include(CheckIPOSupported)
 
 option(NINJA_BUILD_BINARY "Build ninja binary" ON)
+option(NINJA_FORCE_PSELECT "Use pselect() even on platforms that provide ppoll()" OFF)
 
-project(ninja)
+project(ninja CXX)
 
 # --- optional link-time optimization
 check_ipo_supported(RESULT lto_supported OUTPUT error)
@@ -34,6 +35,24 @@ else()
 	check_cxx_compiler_flag(-fdiagnostics-color flag_color_diag)
 	if(flag_color_diag)
 		add_compile_options(-fdiagnostics-color)
+	endif()
+
+	if(NOT NINJA_FORCE_PSELECT)
+		# Check whether ppoll() is usable on the target platform.
+		# Set -DUSE_PPOLL=1 if this is the case.
+		#
+		# NOTE: Use check_cxx_symbol_exists() instead of check_symbol_exists()
+		# because on Linux, <poll.h> only exposes the symbol when _GNU_SOURCE
+		# is defined.
+		#
+		# Both g++ and clang++ define the symbol by default, because the C++
+		# standard library headers require it, but *not* gcc and clang, which
+		# are used by check_symbol_exists().
+		include(CheckCXXSymbolExists)
+		check_cxx_symbol_exists(ppoll poll.h HAVE_PPOLL)
+		if(HAVE_PPOLL)
+			add_compile_definitions(USE_PPOLL=1)
+		endif()
 	endif()
 endif()
 
@@ -90,6 +109,8 @@ function(check_platform_supports_browse_mode RESULT)
 
 endfunction()
 
+set(NINJA_PYTHON "python" CACHE STRING "Python interpreter to use for the browse tool")
+
 check_platform_supports_browse_mode(platform_supports_ninja_browse)
 
 # Core source files all build into ninja library.
@@ -128,10 +149,18 @@ if(WIN32)
 		src/getopt.c
 		src/minidump-win32.cc
 	)
+	# Build getopt.c, which can be compiled as either C or C++, as C++
+	# so that build environments which lack a C compiler, but have a C++
+	# compiler may build ninja.
+	set_source_files_properties(src/getopt.c PROPERTIES LANGUAGE CXX)
 else()
 	target_sources(libninja PRIVATE src/subprocess-posix.cc)
 	if(CMAKE_SYSTEM_NAME STREQUAL "OS400" OR CMAKE_SYSTEM_NAME STREQUAL "AIX")
 		target_sources(libninja PRIVATE src/getopt.c)
+		# Build getopt.c, which can be compiled as either C or C++, as C++
+		# so that build environments which lack a C compiler, but have a C++
+		# compiler may build ninja.
+		set_source_files_properties(src/getopt.c PROPERTIES LANGUAGE CXX)
 	endif()
 
 	# Needed for perfstat_cpu_total
@@ -187,7 +216,7 @@ if(platform_supports_ninja_browse)
 		PROPERTIES
 			OBJECT_DEPENDS "${PROJECT_BINARY_DIR}/build/browse_py.h"
 			INCLUDE_DIRECTORIES "${PROJECT_BINARY_DIR}"
-			COMPILE_DEFINITIONS NINJA_PYTHON="python"
+			COMPILE_DEFINITIONS NINJA_PYTHON="${NINJA_PYTHON}"
 	)
 endif()
 
